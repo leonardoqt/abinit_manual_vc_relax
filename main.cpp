@@ -102,9 +102,9 @@ int main ()
 	vec cell[3];
 	vec cell_new[3], cell_norm_new, cell_unit_new[3];
 	vec stress[3];
-	double tot_ene;
+	double tot_ene,max_f;
 	const double lambda_f = 40.0;
-	const double lambda_t = 50.0;
+	const double lambda_t = 80.0;
 
 	out_cell.open("cell.dat");
 	out_coord.open("coord.dat");
@@ -117,7 +117,6 @@ int main ()
 	if (tmp != check_nat)
 	{
 		cout<<"Error, could not find natom"<<endl;
-		exit(0);
 	}
 	else
 	{
@@ -130,7 +129,6 @@ int main ()
 	if (tmp != check_nel)
 	{
 		cout<<"Error, could not find ntypat"<<endl;
-		exit(0);
 	}
 	else
 	{
@@ -149,7 +147,6 @@ int main ()
 	if (tmp != check_atom)
 	{
 		cout<<"Error, could not find typat"<<endl;
-		exit(0);
 	}
 	else
 	{
@@ -201,9 +198,16 @@ int main ()
 	stress[0].x[2] = stress[2].x[0];
 	stress[1].x[2] = stress[2].x[1];
 	// calculate new cell parameter
+	max_f = 0;
+	for (int t1=0; t1<nat; t1++)
+		if (max_f < force[t1].norm())
+			max_f = force[t1].norm();
 	for (int t1=0; t1<3; t1++)
 	{
-		cell_new[t1] = cell[t1] + stress[t1] * lambda_t;
+		if (max_f < 0.0003)
+			cell_new[t1] = cell[t1] + stress[t1] * lambda_t;
+		else
+			cell_new[t1] = cell[t1];
 		cell_norm_new.x[t1] = cell_new[t1].norm();
 		cell_unit_new[t1] = cell_new[t1] / cell_norm_new.x[t1];
 	}
